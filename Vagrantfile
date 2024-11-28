@@ -37,10 +37,10 @@ Vagrant.configure("2") do |config|
   # Example for VirtualBox:
   config.vm.provider "vmware_desktop" do |vm|
     # Display the VirtualBox GUI when booting the machine
-    vb.gui = false
+    vm.gui = false
  
     # Customize the amount of memory on the VM:
-    vb.memory = "512"
+    vm.memory = "512"
   end
 
   config.vm.provision "file", source: "./README.md", destination: "README.md"
