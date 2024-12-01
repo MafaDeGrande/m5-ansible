@@ -1,9 +1,7 @@
-- name: My first play
-  hosts: myhosts
+- name: Update packages
+  hosts: all
   become: true
   tasks:
-    - name: Ping hosts
-      ansible.builtin.ping:
     - name: Upgrade apt packages
       apt:
         force_apt_get: yes
@@ -11,7 +9,15 @@
     - name: Update apt cache
       apt:
         update_cache: yes
-    - name: Install the nginx
-      apt:
-        name: nginx
-        state: present
+
+- name: Monitoring with grafana, loki and prometheus
+  hosts: host_group1 
+  become: true
+  roles:
+    - monitoring
+
+- name: Installing telegraf and node_exporter
+  hosts: host_group2
+  become: true
+  roles:
+    - monitored

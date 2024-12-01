@@ -1,0 +1,15 @@
+- name: Enable UFW
+  ufw:
+    state: enabled
+
+- name: Allow Node Exporter port
+  ufw:
+    rule: allow
+    port: '9100'
+    proto: tcp
+
+- name: ssh
+  ufw:
+    rule: allow
+    port: '22'
+    proto: tcp

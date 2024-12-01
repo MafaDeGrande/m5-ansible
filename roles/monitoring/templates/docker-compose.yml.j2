@@ -1,0 +1,19 @@
+version: '3'
+services:
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "8083:3000"
+    volumes:
+      - grafana-storage:/var/lib/grafana
+
+  loki:
+    image: grafana/loki
+    ports:
+      - "8084:3100"
+    volumes:
+      - loki-storage:/loki
+
+volumes:
+  grafana-storage:
+  loki-storage:
