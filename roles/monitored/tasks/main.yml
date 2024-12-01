@@ -1,0 +1,101 @@
+- name: Allow ports
+  ansible.builtin.include_tasks:
+    file: allow_ports.yml
+
+- name: Creating node_exporter user group
+  group: name="{{groupId}}"
+  become: true
+
+- name: Creating node_exporter user
+  user:
+    name: "{{userId}}"
+    group: "{{groupId}}"
+    system: yes
+    shell: "/sbin/nologin"
+    comment: "{{userId}} nologin User"
+    createhome: "no"
+    state: present
+
+- name: Download node_exporter
+  get_url:
+    url: "https://github.com/prometheus/node_exporter/releases/download/v{{ version }}/node_exporter-{{ version }}.linux-arm64.tar.gz" 
+    dest: "/tmp/node_exporter.tar.gz"
+
+- name: Create directory for
+  file:
+    path: /usr/local/bin/
+    state: directory
+    mode: '755'
+
+- name: Extract node_exporter
+  unarchive:
+    src: "/tmp/node_exporter.tar.gz"
+    dest: "/usr/local/bin/"
+    owner: "{{userId}}"
+    group: "{{groupId}}"
+    remote_src: true
+    mode: '755'
+
+- name: Copy systemd init file
+  template:
+    src: init.service.j2
+    dest: /etc/systemd/system/node_exporter.service
+
+- name: reload daemon
+  command: systemctl daemon-reload
+
+- name: Start node_exporter service
+  service:
+    name: node_exporter
+    state: started
+    enabled: yes
+
+- name: Install wget and gpg
+  apt:
+    name: 
+      - gpg
+    state: present
+
+- name: Download InfluxData GPG key
+  get_url:
+    url: https://repos.influxdata.com/influxdata-archive.key
+    dest: /tmp/influxdata-archive.key
+    mode: '644'
+
+- name: Verify GPG key integrity
+  shell: |
+    echo "943666881a1b8d9b849b74caebf02d3465d6beb716510d86a39f6c8e8dac7515  /tmp/influxdata-archive.key" | sha256sum -c -
+
+- name: Convert and install GPG key
+  shell: |
+    cat /tmp/influxdata-archive.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/influxdata-archive.gpg > /dev/null
+
+- name: Add InfluxData repository
+  shell: |
+    echo 'deb [signed-by=/etc/apt/trusted.gpg.d/influxdata-archive.gpg] https://repos.influxdata.com/debian stable main' | sudo tee /etc/apt/sources.list.d/influxdata.list
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+
+- name: Install Telegraf
+  apt:
+    name: telegraf
+    state: present
+    update_cache: yes
+
+- name: Create Telegraf configuration directory
+  file:
+    path: "/etc/telegraf"
+    state: directory
+
+- name: Configure Telegraf for Loki
+  template:
+    src: telegraf.conf.j2
+    dest: "/etc/telegraf/telegraf.conf"
+
+- name: Restart Telegraf service
+  systemd:
+    name: telegraf
+    state: restarted
+    enabled: yes
