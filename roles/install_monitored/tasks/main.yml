@@ -1,0 +1,32 @@
+- name: Enable UFW
+  ufw:
+    state: enabled
+
+- name: Configure ports
+  ufw:
+    rule: allow
+    port: "{{ item.port }}"
+    proto: tcp
+  loop:
+    - {port: '9273'} # Telegraf plugin
+    - {port: '22'} # SSH
+
+- name: Create Telegraf configuration directory
+  ansible.builtin.file:
+    path: "/etc/telegraf"
+    state: directory
+
+- name: Configure Telegraf for Loki
+  ansible.builtin.template:
+    src: telegraf.conf.j2
+    dest: "/etc/telegraf/telegraf.conf"
+
+- name: Copy docker-compose 
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "/opt/docker-compose/docker-compose.yml"
+
+- name: Start Telegraf
+  community.docker.docker_compose_v2:
+    project_src: "/opt/docker-compose/"
+    state: present

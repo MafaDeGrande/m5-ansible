@@ -3,17 +3,16 @@ services:
   grafana:
     image: grafana/grafana
     ports:
-      - "8083:3000"
+      - "3000:3000"
     volumes:
       - grafana-storage:/var/lib/grafana
 
-  loki:
-    image: grafana/loki
+  prometheus:
+    image: prom/prometheus
     ports:
-      - "8084:3100"
+      - "9090:9090"
     volumes:
-      - loki-storage:/loki
+      - /etc/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
 
 volumes:
   grafana-storage:
-  loki-storage:
