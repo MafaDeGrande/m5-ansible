@@ -1,23 +1,25 @@
-- name: Update packages
+- name: Update and upgrade apt packages
   hosts: all
   become: true
   tasks:
     - name: Upgrade apt packages
-      apt:
+      ansible.builtin.apt:
         force_apt_get: yes
         upgrade: dist
     - name: Update apt cache
-      apt:
+      ansible.builtin.apt:
         update_cache: yes
 
-- name: Monitoring with grafana, loki and prometheus
-  hosts: host_group1 
+- name: Monitoring with grafana and prometheus
+  hosts: monitoring_host
   become: true
   roles:
-    - monitoring
+    - install_docker
+    - install_monitoring
 
-- name: Installing telegraf and node_exporter
-  hosts: host_group2
+- name: Installing telegraf
+  hosts: monitored_host
   become: true
   roles:
-    - monitored
+    - install_docker
+    - install_monitored

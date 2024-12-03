@@ -1,0 +1,17 @@
+- name: Installing docker 
+  apt:
+    name:
+      - docker.io
+      - docker-compose-v2
+    state: present
+
+- name: Run docker
+  systemd:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Create dir for docker-compose
+  file:
+    path: "/opt/docker-compose"
+    state: directory
