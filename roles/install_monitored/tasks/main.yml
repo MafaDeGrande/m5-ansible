@@ -13,13 +13,21 @@
 
 - name: Create Telegraf configuration directory
   ansible.builtin.file:
-    path: "/etc/telegraf"
+    path: "/etc/telegraf/telegraf.d"
     state: directory
 
-- name: Configure Telegraf for Loki
+- name: Configure Telegraf 
   ansible.builtin.template:
-    src: telegraf.conf.j2
+    src: "telegraf.conf.j2"
     dest: "/etc/telegraf/telegraf.conf"
+
+- name: Configure Telegraf configuration folder
+  ansible.builtin.template:
+    src: "{{ item }}"
+    dest: "/etc/telegraf/telegraf.d/{{ item | basename | regex_replace('.j2$', '') }}"
+  with_fileglob:
+    - "../templates/*conf.j2"
+  when: "{{ item | basename != 'telegraf.conf.j2' }}"
 
 - name: Copy docker-compose 
   ansible.builtin.template:

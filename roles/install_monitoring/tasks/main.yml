@@ -12,12 +12,22 @@
     - {port: '3000'} # Grafana
     - {port: '22'} # SSH
 
-- name: Creates directory
+- name: Creates directory for Prometheus
   file: 
     path: "/etc/prometheus/"
     state: directory
 
-- name: config file
+- name: Creates directory for Grafana 
+  file: 
+    path: "/etc/grafana/"
+    state: directory
+
+- name: grafana config file 
+  template:
+    src: grafana.ini.j2
+    dest: "/etc/grafana/grafana.ini"
+
+- name: prometheus config file
   template: 
     src: prometheus.yml.j2
     dest: "/etc/prometheus/prometheus.yml"
