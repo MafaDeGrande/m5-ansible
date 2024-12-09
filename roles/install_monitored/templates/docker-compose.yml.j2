@@ -1,0 +1,14 @@
+version: '3'
+services:
+  telegraf:
+    image: telegraf:latest
+    ports:
+      - "9273:9273"
+    volumes:
+      - '/etc/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro'
+      - '/etc/telegraf/telegraf.d:/etc/telegraf/telegraf.d/'
+      - '/sys:/hostfs/sys:ro'
+      - '/proc:/hostfs/proc:ro'
+      - '/etc:/hostfs/etc:ro'
+      - '/var:/hostfs/var:ro'
+      - '/run:/hostfs/run:ro'
